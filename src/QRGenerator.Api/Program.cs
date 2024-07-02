@@ -7,7 +7,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddQRCodeService();
 
-builder.Services.AddEndpoints([typeof(RequestsEndpoint).Assembly, typeof(IEndpoint).Assembly]);
+builder.Services.AddEndpoints([typeof(QrCodeEndpoint).Assembly, typeof(IEndpoint).Assembly]);
 
 var app = builder.Build();
 
