@@ -7,8 +7,6 @@ namespace QRCodeService;
 
 public class QRCodeService(ILogger<QRCodeService> logger) : IQRCodeService
 {
-    private readonly ILogger<QRCodeService> _logger = logger;
-
     public byte[] GenerateQRCodeByte(string inputText)
     {
         try
@@ -34,7 +32,7 @@ public class QRCodeService(ILogger<QRCodeService> logger) : IQRCodeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An error occurred at {nameof(GenerateQRCodeByte)}");
+            logger.LogError(ex, $"An error occurred at {nameof(GenerateQRCodeByte)}");
             return GenerateDefaultImage(ex.Message);
         }
     }
@@ -94,30 +92,27 @@ public class QRCodeService(ILogger<QRCodeService> logger) : IQRCodeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An error occurred at {nameof(GenerateQRCodeByte)}");
+            logger.LogError(ex, $"An error occurred at {nameof(GenerateQRCodeByte)}");
             throw;
         }
     }
 
+
     private void SaveImageToFile(SKImage imageToSave, string filePath)
     {
-        using var encodedImage = imageToSave.Encode();
-        using var fileSteam = new FileStream(filePath, FileMode.Create, FileAccess.Write);
-        encodedImage.SaveTo(fileSteam);
+        using var encodedImage = imageToSave.Encode(SKEncodedImageFormat.Png, 100);
+        using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        encodedImage.SaveTo(fileStream);
     }
 
     private byte[] GenerateDefaultImage(string error)
     {
-        // crate a surface
         var info = new SKImageInfo(512, 512);
         using var surface = SKSurface.Create(info);
-        // the the canvas and properties
         var canvas = surface.Canvas;
 
-        // make sure the canvas is blank
         canvas.Clear(SKColors.White);
 
-        // draw some text
         var paint = new SKPaint
         {
             Color = SKColors.Black,
@@ -130,7 +125,6 @@ public class QRCodeService(ILogger<QRCodeService> logger) : IQRCodeService
 
         canvas.DrawText(error, coord, paint);
 
-        // save the file
         var image = surface.Snapshot();
         var data = image.Encode(SKEncodedImageFormat.Png, 100);
 
